@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pediatric First — Interactive Pitch</title>
+<style>
+  :root{
+    --bg:#060a1a;
+    --bg2:#0a1230;
+    --panel:rgba(255,255,255,.08);
+    --panel2:rgba(255,255,255,.12);
+    --line:rgba(255,255,255,.16);
+    --text:#f7f9ff;
+    --muted:#afbddb;
+    --cyan:#54e8ff;
+    --blue:#6f8cff;
+    --violet:#ad78ff;
+    --gold:#ffd36a;
+    --coral:#ff7b84;
+    --green:#6ff0b1;
+    --shadow:0 24px 70px rgba(0,0,0,.38);
+    --radius:24px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  button,input,textarea{font:inherit}
+  button{cursor:pointer}
+  .app{
+    height:100%;
+    position:relative;
+    background:
+      radial-gradient(circle at 12% 15%,rgba(84,232,255,.11),transparent 25%),
+      radial-gradient(circle at 90% 8%,rgba(173,120,255,.13),transparent 28%),
+      radial-gradient(circle at 76% 88%,rgba(111,140,255,.12),transparent 30%),
+      linear-gradient(145deg,#050817,#09122e 58%,#060918);
+  }
+  .ambient{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.75}
+  .orb{position:absolute;border-radius:50%;filter:blur(1px);animation:float 12s ease-in-out infinite}
+  .orb:nth-child(1){width:260px;height:260px;left:-110px;top:20%;background:radial-gradient(circle,rgba(84,232,255,.13),transparent 68%)}
+  .orb:nth-child(2){width:330px;height:330px;right:-130px;top:2%;background:radial-gradient(circle,rgba(173,120,255,.15),transparent 67%);animation-delay:-4s}
+  .orb:nth-child(3){width:280px;height:280px;right:8%;bottom:-150px;background:radial-gradient(circle,rgba(255,211,106,.09),transparent 65%);animation-delay:-7s}
+  @keyframes float{50%{transform:translateY(-20px) translateX(12px) scale(1.04)}}
+  .topbar{
+    position:absolute;z-index:40;left:18px;right:18px;top:14px;height:52px;
+    display:flex;align-items:center;gap:9px;padding:7px 10px;
+    background:rgba(4,8,23,.66);backdrop-filter:blur(16px);
+    border:1px solid var(--line);border-radius:17px;box-shadow:0 10px 35px rgba(0,0,0,.24)
+  }
+  .brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+  .brand-mark{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--cyan),var(--violet));box-shadow:0 0 30px rgba(84,232,255,.25)}
+  .brand-mark svg{width:21px;height:21px}
+  .brand-copy{min-width:0}
+  .brand-copy strong{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand-copy span{font-size:11px;color:var(--muted)}
+  .tool{
+    height:36px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.06);
+    color:var(--text);padding:0 12px;display:flex;align-items:center;gap:7px;transition:.2s ease
+  }
+  .tool:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+  .tool.primary{background:linear-gradient(135deg,rgba(84,232,255,.22),rgba(111,140,255,.24));border-color:rgba(84,232,255,.38)}
+  .tool.warn{border-color:rgba(255,211,106,.4);color:#ffe5a3}
+  .tool svg{width:16px;height:16px}
+  .progress-wrap{position:absolute;left:28px;right:28px;top:76px;z-index:35;height:4px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+  .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));transition:width .45s ease}
+  #deck{position:absolute;inset:82px 0 62px}
+  .slide{
+    position:absolute;inset:0;padding:42px clamp(34px,6vw,100px) 34px;
+    display:grid;align-content:center;opacity:0;transform:translateX(60px) scale(.985);
+    pointer-events:none;transition:opacity .45s ease,transform .52s cubic-bezier(.22,.8,.2,1)
+  }
+  .slide.active{opacity:1;transform:none;pointer-events:auto}
+  .slide.exit-left{opacity:0;transform:translateX(-60px) scale(.985)}
+  .eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.18em;color:var(--cyan);font-weight:800;margin-bottom:14px}
+  h1,h2,h3,p{margin-top:0}
+  h1{font-size:clamp(42px,7vw,92px);line-height:.97;letter-spacing:-.055em;margin-bottom:22px}
+  h2{font-size:clamp(32px,5.2vw,66px);line-height:1.02;letter-spacing:-.045em;margin-bottom:18px}
+  h3{font-size:clamp(19px,2.1vw,28px);line-height:1.15}
+  .lead{font-size:clamp(18px,2.1vw,28px);line-height:1.45;color:#dbe5ff;max-width:1000px}
+  .muted{color:var(--muted)}
+  .accent{color:var(--cyan)}
+  .gold{color:var(--gold)}
+  .coral{color:var(--coral)}
+  .green{color:var(--green)}
+  .gradient-text{
+    background:linear-gradient(90deg,#fff 0%,#89f1ff 42%,#c9a4ff 92%);
+    -webkit-background-clip:text;background-clip:text;color:transparent
+  }
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .glass{
+    background:linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.045));
+    border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px)
+  }
+  .card{padding:24px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.06);color:#dce7ff;font-size:13px}
+  .icon-box{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:rgba(84,232,255,.11);border:1px solid rgba(84,232,255,.22);margin-bottom:16px}
+  .icon-box svg{width:25px;height:25px}
+  .source-note{position:absolute;left:clamp(34px,6vw,100px);bottom:8px;color:#7f8cab;font-size:10px;max-width:76%}
+  .source-note a{color:#90a9d8}
+  .scene-number{position:absolute;right:clamp(34px,6vw,100px);bottom:4px;color:#687898;font-size:12px;letter-spacing:.15em}
+  .bottom-nav{
+    position:absolute;z-index:40;left:50%;bottom:12px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:10px;padding:7px;background:rgba(4,8,23,.72);backdrop-filter:blur(16px);
+    border:1px solid var(--line);border-radius:18px
+  }
+  .nav-btn{width:42px;height:38px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.07);color:#fff;display:grid;place-items:center}
+  .nav-btn:hover{background:rgba(255,255,255,.14)}
+  .slide-label{min-width:130px;text-align:center;font-size:12px;color:var(--muted)}
+  .hotkey{font-size:10px;color:#7483a5}
+  /* Opening */
+  .opening{max-width:1150px;margin:auto;text-align:center}
+  .opening .question{font-size:clamp(31px,5vw,67px);line-height:1.08;letter-spacing:-.04em}
+  .heartbeat{width:min(720px,92%);height:78px;margin:4px auto 20px;filter:drop-shadow(0 0 13px rgba(84,232,255,.35))}
+  .heartbeat path{stroke-dasharray:1200;stroke-dashoffset:1200;animation:drawLine 3.6s ease forwards}
+  @keyframes drawLine{to{stroke-dashoffset:0}}
+  .reveal-line{opacity:0;animation:fadeUp .9s .8s ease forwards}
+  .reveal-line.delay{animation-delay:1.7s}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  /* Cancer difference */
+  .biology-stage{position:relative;min-height:430px;padding:24px;overflow:hidden}
+  .person{position:absolute;width:170px;height:310px;bottom:34px;display:flex;justify-content:center}
+  .person.adult{left:12%}.person.child{right:15%;transform:scale(.82);transform-origin:bottom}
+  .head{position:absolute;top:0;width:72px;height:72px;border-radius:50%;background:linear-gradient(145deg,rgba(111,140,255,.45),rgba(84,232,255,.15));border:1px solid rgba(255,255,255,.25)}
+  .body{position:absolute;top:78px;width:115px;height:180px;border-radius:55px 55px 32px 32px;background:linear-gradient(145deg,rgba(111,140,255,.35),rgba(173,120,255,.13));border:1px solid rgba(255,255,255,.2)}
+  .leg{position:absolute;bottom:0;width:36px;height:95px;border-radius:20px;background:rgba(111,140,255,.28);border:1px solid rgba(255,255,255,.16)}
+  .leg.l{left:42px}.leg.r{right:42px}
+  .tumor{position:absolute;width:64px;height:64px;border-radius:45% 55% 50% 43%;top:126px;left:53px;background:radial-gradient(circle at 35% 32%,#ffcfcc,var(--coral) 50%,#ad3349 100%);box-shadow:0 0 30px rgba(255,123,132,.35);animation:pulse 2.5s ease-in-out infinite}
+  .child .tumor{background:radial-gradient(circle at 35% 32%,#ffe5ad,var(--gold) 48%,#b17519);box-shadow:0 0 30px rgba(255,211,106,.35)}
+  @keyframes pulse{50%{transform:scale(1.12) rotate(4deg)}}
+  .dna{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);width:120px;height:240px}
+  .dna .rung{position:absolute;left:10px;right:10px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet));transform-origin:center;animation:twist 4s linear infinite}
+  .dna .rung:nth-child(1){top:15px}.dna .rung:nth-child(2){top:45px;animation-delay:-.5s}.dna .rung:nth-child(3){top:75px;animation-delay:-1s}
+  .dna .rung:nth-child(4){top:105px;animation-delay:-1.5s}.dna .rung:nth-child(5){top:135px;animation-delay:-2s}
+  .dna .rung:nth-child(6){top:165px;animation-delay:-2.5s}.dna .rung:nth-child(7){top:195px;animation-delay:-3s}
+  @keyframes twist{0%,100%{transform:scaleX(.2)}50%{transform:scaleX(1)}}
+  .label{position:absolute;bottom:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+  .person.adult .label{left:40px}.person.child .label{left:42px}
+  .biology-message{position:absolute;left:50%;top:16px;transform:translateX(-50%);text-align:center;width:65%}
+  /* Pipeline */
+  .pipeline{margin-top:34px;padding:36px 22px 46px;position:relative;overflow:hidden}
+  .track{height:10px;background:rgba(255,255,255,.1);border-radius:99px;position:relative;margin:75px 45px 55px}
+  .track:after{content:"";position:absolute;left:0;top:0;bottom:0;width:78%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));animation:growTrack 2.8s ease forwards}
+  @keyframes growTrack{from{width:0}}
+  .station{position:absolute;top:-44px;transform:translateX(-50%);text-align:center;width:145px}
+  .station .dot{width:18px;height:18px;border-radius:50%;margin:35px auto 8px;background:#fff;border:4px solid var(--blue);box-shadow:0 0 20px rgba(111,140,255,.7)}
+  .station span{font-size:12px;color:#d7e2ff;font-weight:700}
+  .station.s1{left:5%}.station.s2{left:28%}.station.s3{left:51%}.station.s4{left:74%}
+  .station.s5{left:96%;opacity:.45}.station.s5 .dot{border-color:var(--gold);background:var(--gold)}
+  .drug-dot{position:absolute;width:24px;height:24px;border-radius:50%;left:3%;top:-7px;background:radial-gradient(circle at 32% 30%,#fff,var(--cyan) 35%,var(--blue));box-shadow:0 0 28px rgba(84,232,255,.8);animation:travel 5s ease-in-out infinite}
+  @keyframes travel{0%{left:3%}70%{left:73%}85%,100%{left:73%}}
+  .child-wait{position:absolute;right:20px;bottom:12px;color:var(--gold);font-weight:800;font-size:13px;animation:blink 2s ease-in-out infinite}
+  @keyframes blink{50%{opacity:.45}}
+  .delay-badge{position:absolute;right:4%;top:15px;padding:10px 14px;border:1px solid rgba(255,211,106,.35);border-radius:14px;background:rgba(255,211,106,.09);color:#ffe7a9;font-size:12px}
+  /* Questions */
+  .question-cloud{position:relative;min-height:420px}
+  .molecule-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:130px;height:130px;border-radius:50%;display:grid;place-items:center;
+    background:radial-gradient(circle at 35% 30%,#fff,var(--cyan) 20%,var(--blue) 65%,#3940a0);
+    color:#07112b;font-weight:900;box-shadow:0 0 65px rgba(84,232,255,.35)}
+  .bubble{position:absolute;padding:14px 18px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.07);max-width:250px;color:#dce6ff;font-size:14px;animation:bob 4.5s ease-in-out infinite}
+  .bubble:nth-child(2){left:3%;top:8%}.bubble:nth-child(3){right:3%;top:10%;animation-delay:-1s}
+  .bubble:nth-child(4){left:0;bottom:12%;animation-delay:-2s}.bubble:nth-child(5){right:0;bottom:10%;animation-delay:-3s}
+  .bubble:nth-child(6){left:35%;top:0;animation-delay:-1.8s}
+  @keyframes bob{50%{transform:translateY(-8px)}}
+  /* checkpoint */
+  .checkpoint-stage{position:relative;padding:34px;overflow:hidden}
+  .mini-track{height:8px;background:rgba(255,255,255,.1);border-radius:99px;margin:105px 30px;position:relative}
+  .mini-track:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:99px}
+  .checkpoint{position:absolute;left:43%;top:42px;width:150px;height:145px;border-radius:26px;border:2px solid rgba(255,211,106,.65);background:linear-gradient(145deg,rgba(255,211,106,.18),rgba(255,123,132,.08));display:grid;place-items:center;text-align:center;box-shadow:0 0 55px rgba(255,211,106,.2);animation:checkpointGlow 2.3s ease-in-out infinite}
+  @keyframes checkpointGlow{50%{box-shadow:0 0 80px rgba(255,211,106,.38);transform:scale(1.025)}}
+  .branch{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:-30px}
+  .branch div{padding:12px 9px;text-align:center;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid var(--line);font-size:12px}
+  /* workflow */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
+  .step{position:relative;padding:23px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.055);min-height:255px;transition:.3s ease;overflow:hidden}
+  .step:hover,.step.active{transform:translateY(-6px);border-color:rgba(84,232,255,.45);background:rgba(84,232,255,.09)}
+  .step-no{font-size:52px;font-weight:900;color:rgba(255,255,255,.11);position:absolute;right:14px;top:5px}
+  .step h3{margin-top:44px}
+  .step p{font-size:14px;color:var(--muted);line-height:1.5}
+  .step-connector{position:absolute;right:-11px;top:50%;width:22px;height:2px;background:var(--cyan);z-index:5}
+  /* demo */
+  .demo-panel{padding:22px;margin-top:20px}
+  .candidate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .candidate{padding:20px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.055);transition:.25s;position:relative;overflow:hidden}
+  .candidate:hover{transform:translateY(-4px)}
+  .candidate.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,211,106,.15),0 16px 40px rgba(0,0,0,.2)}
+  .candidate .mol{height:82px;display:grid;place-items:center}
+  .candidate .mol svg{width:78px;height:78px}
+  .candidate .meter{height:7px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;margin:12px 0}
+  .candidate .meter span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:99px}
+  .candidate .pediatric{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .demo-panel.revealed .pediatric{display:block;animation:fadeUp .45s ease both}
+  .demo-panel.revealed .adult-only{opacity:.6}
+  .demo-actions{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:18px}
+  .action{border:1px solid rgba(84,232,255,.35);border-radius:14px;background:linear-gradient(135deg,rgba(84,232,255,.16),rgba(111,140,255,.15));color:#fff;padding:12px 18px;font-weight:800}
+  .action.secondary{border-color:var(--line);background:rgba(255,255,255,.06)}
+  .demo-message{text-align:center;min-height:28px;color:var(--gold);font-weight:800;margin-top:12px}
+  /* report */
+  .report{padding:25px;margin-top:18px;display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  .report-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .report-block{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.045);margin-bottom:10px}
+  .report-block small{display:block;color:var(--muted);margin-bottom:5px}
+  .chart{height:225px;border:1px solid var(--line);border-radius:18px;position:relative;overflow:hidden;background:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:32px 32px}
+  .curve{position:absolute;inset:15px}
+  .curve svg{width:100%;height:100%}
+  .curve path{stroke-dasharray:900;stroke-dashoffset:900;animation:drawLine 3s ease forwards}
+  /* comparison */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+  .compare-col{padding:26px}
+  .compare-col.highlight{border-color:rgba(84,232,255,.42);background:linear-gradient(145deg,rgba(84,232,255,.11),rgba(111,140,255,.07))}
+  .compare-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px;color:#dce5fb}
+  .compare-row:last-child{border-bottom:0}
+  .check{color:var(--green);font-weight:900}.minus{color:#7f8ba6}
+  .big-quote{margin-top:20px;padding:20px 26px;text-align:center;font-size:clamp(22px,3vw,38px);font-weight:900;letter-spacing:-.03em;border-color:rgba(255,211,106,.35);color:#fff0c3}
+  /* business */
+  .stakeholders{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center}
+  .stake-card{padding:25px;min-height:230px}
+  .arrow-big{font-size:50px;color:var(--cyan);animation:nudge 1.8s ease-in-out infinite}
+  @keyframes nudge{50%{transform:translateX(8px)}}
+  .pill-list{display:flex;flex-wrap:wrap;gap:9px}
+  /* proof */
+  .metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+  .metric{padding:22px;text-align:center}
+  .metric strong{display:block;font-size:clamp(32px,4.5vw,58px);letter-spacing:-.04em;color:var(--cyan)}
+  .metric span{font-size:13px;color:var(--muted)}
+  .funding-flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:24px}
+  .fund-node{padding:15px 16px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.06);font-size:13px;text-align:center}
+  .fund-arrow{color:var(--cyan);font-size:22px}
+  /* closing */
+  .closing{text-align:center;max-width:1120px;margin:auto}
+  .closing-pipeline{height:160px;position:relative;margin:18px auto;width:min(900px,95%)}
+  .closing-line{position:absolute;left:4%;right:4%;top:78px;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet))}
+  .late-point,.early-point{position:absolute;top:30px;width:145px;text-align:center;font-size:12px;font-weight:800}
+  .late-point{right:0;color:var(--coral);animation:moveEarlier 4.4s ease-in-out infinite}
+  .early-point{left:8%;color:var(--green);opacity:0;animation:appearEarly 4.4s ease-in-out infinite}
+  .point-dot{width:30px;height:30px;border-radius:50%;margin:17px auto;background:currentColor;box-shadow:0 0 24px currentColor}
+  @keyframes moveEarlier{0%,25%{right:0;opacity:1}65%,100%{right:72%;opacity:0}}
+  @keyframes appearEarly{0%,55%{opacity:0}75%,100%{opacity:1}}
+  /* modals */
+  .overlay{position:absolute;z-index:100;inset:0;background:rgba(2,5,15,.82);backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:28px}
+  .overlay.open{display:flex}
+  .modal{width:min(1160px,96vw);max-height:90vh;overflow:auto;padding:26px;background:#0b1330;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow)}
+  .modal-head{display:flex;align-items:center;gap:12px;position:sticky;top:-26px;background:#0b1330;padding:4px 0 16px;z-index:4}
+  .modal-head h2{font-size:30px;margin:0 auto 0 0}
+  .close{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff}
+  .notes-layout{display:grid;grid-template-columns:.35fr .65fr;gap:18px}
+  .note-meta{padding:20px}
+  .note-script{padding:24px;white-space:pre-wrap;line-height:1.72;color:#e9efff;font-size:17px}
+  .note-meta .meta-row{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+  .note-meta small{display:block;color:var(--muted);margin-bottom:4px}
+  .copy-btn{margin-top:14px;width:100%}
+  .qa-controls{display:flex;gap:10px;margin-bottom:16px}
+  .qa-search{flex:1;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.06);color:#fff;padding:12px}
+  .qa-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .qa-item{border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.05);overflow:hidden}
+  .qa-q{width:100%;text-align:left;border:0;background:transparent;color:#fff;padding:17px;font-weight:800;display:flex;justify-content:space-between;gap:12px}
+  .qa-a{display:none;padding:0 17px 17px;color:#dce5f8;line-height:1.55}
+  .qa-item.open .qa-a{display:block}
+  .qa-a .short{padding:12px;border-radius:13px;background:rgba(84,232,255,.08);border:1px solid rgba(84,232,255,.18);margin-bottom:10px}
+  .qa-a small{color:var(--gold);font-weight:800}
+  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+  .field label{display:block;color:#b9c6e4;font-size:12px;margin:0 0 6px}
+  .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.055);color:#fff;padding:11px}
+  .field textarea{min-height:85px;resize:vertical}
+  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+  .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .thumb{padding:18px;min-height:120px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.05);color:#fff;text-align:left}
+  .thumb:hover{border-color:rgba(84,232,255,.4);transform:translateY(-2px)}
+  .thumb small{color:var(--cyan)}
+  .toast{position:absolute;z-index:150;right:25px;bottom:76px;padding:12px 16px;border-radius:13px;background:#122044;border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s}
+  .toast.show{opacity:1;transform:none}
+  .timer{font-variant-numeric:tabular-nums;color:var(--gold);font-size:13px;min-width:52px;text-align:center}
+  .placeholder{outline:1px dashed rgba(255,211,106,.5);outline-offset:3px;border-radius:4px}
+  .reduce-motion *{animation:none!important;transition-duration:.01ms!important}
+  @media(max-width:900px){
+    .hide-sm{display:none}.grid-2,.compare,.report,.notes-layout,.stakeholders{grid-template-columns:1fr}
+    .grid-3,.steps,.candidate-grid,.metric-grid,.qa-list,.overview-grid{grid-template-columns:1fr 1fr}
+    .slide{padding:32px 28px 26px;overflow:auto;align-content:start}
+    .biology-stage{min-height:360px}.person.adult{left:3%}.person.child{right:7%}
+    .arrow-big{transform:rotate(90deg)}
+  }
+  @media(max-width:600px){
+    .topbar{left:8px;right:8px}.tool{padding:0 9px}.brand-copy span{display:none}
+    #deck{inset:78px 0 58px}.slide{padding:26px 18px}
+    .grid-3,.steps,.candidate-grid,.metric-grid,.qa-list,.overview-grid,.form-grid{grid-template-columns:1fr}
+    .source-note{display:none}.bottom-nav{bottom:7px}.slide-label{min-width:95px}
+  }
+  @media print{
+    html,body{overflow:visible;background:#fff;color:#111}
+    .topbar,.bottom-nav,.progress-wrap,.ambient,.overlay{display:none!important}
+    #deck{position:static}
+    .slide{position:relative;opacity:1!important;transform:none!important;page-break-after:always;min-height:100vh;color:#111;background:#fff}
+    .glass,.card{background:#fff;border:1px solid #ccc;box-shadow:none}
+    .muted,.lead{color:#333}.source-note{color:#555}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="ambient"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="#07112b" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#07112b" stroke-width="2"/></svg>
+      </div>
+      <div class="brand-copy">
+        <strong data-bind="platformName">PediaBridge</strong>
+        <span>Interactive pitch experience</span>
+      </div>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+    <button class="tool hide-sm" id="overviewBtn" title="Slide overview">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke="currentColor" stroke-width="1.8"/></svg> Overview
+    </button>
+    <button class="tool primary" id="notesBtn" title="Presenter script">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Script
+    </button>
+    <button class="tool" id="qaBtn" title="Judge questions">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9.6 9a2.6 2.6 0 1 1 4.8 1.4c-.8 1.2-2.4 1.4-2.4 3M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Q&amp;A
+    </button>
+    <button class="tool warn hide-sm" id="customizeBtn" title="Replace project details">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4l11-11-4-4L4 16v4ZM13 7l4 4" stroke="currentColor" stroke-width="1.8"/></svg> Customize
+    </button>
+    <button class="tool" id="motionBtn" title="Reduce motion">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 15c3-8 6 8 9 0s5 0 7-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button class="tool" id="fullBtn" title="Full screen">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M8 4H4v4M16 4h4v4M4 16v4h4M20 16v4h-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </header>
+
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+  <main id="deck">
+    <!-- 1 -->
+    <section class="slide active" data-title="The human question">
+      <div class="opening">
+        <div class="eyebrow">Begin with one human question</div>
+        <svg class="heartbeat" viewBox="0 0 900 90" fill="none" aria-hidden="true">
+          <path d="M0 48h220l32-1 18-30 25 58 28-48 20 21h557" stroke="url(#pulseGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs><linearGradient id="pulseGradient"><stop stop-color="#54e8ff"/><stop offset=".55" stop-color="#6f8cff"/><stop offset="1" stop-color="#ad78ff"/></linearGradient></defs>
+        </svg>
+        <h1 class="question reveal-line">Imagine there may be a medicine that could help your child…</h1>
+        <p class="lead reveal-line delay" style="margin-inline:auto">but no one has asked the <span class="gold">child-specific question</span> yet.</p>
+      </div>
+      <div class="scene-number">01 / 12</div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-title="Cancer is not one disease">
+      <div class="grid-2">
+        <div>
+          <div class="eyebrow">The first misunderstanding</div>
+          <h2>“Cancer is cancer.”<br><span class="gradient-text">Actually, cancer is many diseases.</span></h2>
+          <p class="lead">The cancers children get can grow differently, respond differently, and occur inside a body that is still developing.</p>
+          <div class="pill-list">
+            <span class="chip">Different tumor biology</span>
+            <span class="chip">Different response</span>
+            <span class="chip">A growing body</span>
+          </div>
+        </div>
+        <div class="biology-stage glass">
+          <div class="biology-message"><strong>Same word. Different biological problem.</strong><br><span class="muted">The question is not simply “Can we use less?”</span></div>
+          <div class="person adult"><div class="head"></div><div class="body"></div><div class="tumor"></div><div class="leg l"></div><div class="leg r"></div><div class="label">Adult</div></div>
+          <div class="dna"><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div></div>
+          <div class="person child"><div class="head"></div><div class="body"></div><div class="tumor"></div><div class="leg l"></div><div class="leg r"></div><div class="label">Child</div></div>
+        </div>
+      </div>
+      <div class="source-note">NCI: Childhood cancers may differ from adult cancers in growth, spread, treatment, and treatment response. <a href="https://www.cancer.gov/publications/dictionaries/cancer-terms/def/childhood-cancer" target="_blank">Source</a></div>
+      <div class="scene-number">02 / 12</div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-title="Where the delay begins">
+      <div class="eyebrow">The current system</div>
+      <h2>New cancer drugs usually begin on an <span class="accent">adult-focused path.</span></h2>
+      <p class="lead">The child-specific question may be asked only after years of research, investment, and decisions.</p>
+      <div class="pipeline glass">
+        <div class="delay-badge">Historical median to first child trial: 6.5 years</div>
+        <div class="track">
+          <div class="drug-dot"></div>
+          <div class="station s1"><span>Drug idea</span><div class="dot"></div></div>
+          <div class="station s2"><span>Adult models</span><div class="dot"></div></div>
+          <div class="station s3"><span>Adult evidence</span><div class="dot"></div></div>
+          <div class="station s4"><span>Major decisions</span><div class="dot"></div></div>
+          <div class="station s5"><span>Ask about children</span><div class="dot"></div></div>
+        </div>
+        <div class="child-wait">Children are considered later →</div>
+      </div>
+      <div class="glass card" style="text-align:center;margin-top:14px">
+        <strong style="font-size:clamp(20px,2.7vw,36px)">The delay begins <span class="coral">before</span> the child trial.</strong>
+        <div class="muted" style="margin-top:6px">It begins when early drug-development decisions are made without pediatric evidence.</div>
+      </div>
+      <div class="source-note">Historical analysis of FDA-approved oncology drugs: median 6.5-year lag from first-in-human to first-in-child trials. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6491224/" target="_blank">Source</a></div>
+      <div class="scene-number">03 / 12</div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-title="The missing answers">
+      <div class="grid-2">
+        <div>
+          <div class="eyebrow">The exact problem</div>
+          <h2>A developer may have a promising drug—but still lack the <span class="gold">pediatric answer.</span></h2>
+          <p class="lead">Without the right models, testing, and interpretation, the most important questions remain unanswered.</p>
+        </div>
+        <div class="question-cloud glass">
+          <div class="molecule-core">DRUG<br>CANDIDATE</div>
+          <div class="bubble">Could it show promise against a childhood cancer?</div>
+          <div class="bubble">Which pediatric model should be used?</div>
+          <div class="bubble">Is the response strong and reproducible?</div>
+          <div class="bubble">Should we invest, modify, combine, or stop?</div>
+          <div class="bubble">What is the smartest next experiment?</div>
+        </div>
+      </div>
+      <div class="glass card" style="margin-top:18px;text-align:center;border-color:rgba(255,211,106,.35)">
+        <strong style="font-size:clamp(21px,3vw,38px)">The missing product is not “more data.” It is an <span class="gold">earlier, clearer decision.</span></strong>
+      </div>
+      <div class="scene-number">04 / 12</div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-title="The solution">
+      <div class="eyebrow">Our simple idea</div>
+      <h2>Put a <span class="gold">pediatric evidence checkpoint</span> earlier in drug development.</h2>
+      <p class="lead">Before more years and money are committed, ask: “Does this candidate show enough promise in pediatric cancer models to deserve the next step?”</p>
+      <div class="checkpoint-stage glass">
+        <div class="mini-track"></div>
+        <div class="checkpoint"><div><strong>PEDIATRIC<br>EVIDENCE<br>CHECKPOINT</strong><div style="font-size:11px;color:#ffe9b0;margin-top:8px">Earlier in the decision</div></div></div>
+        <div class="branch">
+          <div class="green">ADVANCE</div><div class="accent">MODIFY</div><div class="gold">COMBINE</div><div>VALIDATE</div><div class="coral">STOP</div>
+        </div>
+      </div>
+      <div class="glass big-quote">We do not promise that every drug will work. We help ask the right pediatric question sooner.</div>
+      <div class="scene-number">05 / 12</div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-title="How the service works">
+      <div class="eyebrow">What we actually do</div>
+      <h2>From a drug candidate to a <span class="accent">clearer pediatric decision.</span></h2>
+      <div class="steps">
+        <article class="step active"><span class="step-no">1</span><h3>Receive</h3><p>A researcher or company brings a drug candidate, combination, target, or development question.</p><div class="step-connector"></div></article>
+        <article class="step"><span class="step-no">2</span><h3>Match</h3><p>We choose the relevant pediatric cancer model and design the appropriate study.</p><div class="step-connector"></div></article>
+        <article class="step"><span class="step-no">3</span><h3>Test</h3><p>We measure the response using <span data-bind="assays" class="placeholder">the team’s validated assays</span>.</p><div class="step-connector"></div></article>
+        <article class="step"><span class="step-no">4</span><h3>Explain</h3><p>We turn the findings into an evidence package showing what happened, what remains uncertain, and what to test next.</p></article>
+      </div>
+      <div class="glass big-quote">The experiment creates data. <span class="accent">Our service turns data into a development decision.</span></div>
+      <div class="scene-number">06 / 12</div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-title="Interactive decision demo">
+      <div class="eyebrow">Let the judges feel the problem</div>
+      <h2>Which candidate would <span class="gold">you</span> fund?</h2>
+      <p class="lead">Choose using only the adult-focused evidence. Then reveal the pediatric evidence.</p>
+      <div class="demo-panel glass" id="demoPanel">
+        <div class="candidate-grid">
+          <article class="candidate" data-candidate="A">
+            <div class="mol">
+              <svg viewBox="0 0 100 100"><circle cx="25" cy="50" r="16" fill="#54e8ff"/><circle cx="68" cy="27" r="14" fill="#6f8cff"/><circle cx="73" cy="72" r="17" fill="#ad78ff"/><path d="M39 43 56 33M40 58l17 9M69 42l2 13" stroke="#fff" stroke-width="5"/></svg>
+            </div>
+            <h3>Candidate A</h3>
+            <div class="adult-only"><small>Adult-model signal</small><div class="meter"><span style="width:92%"></span></div><strong>Very strong</strong></div>
+            <div class="pediatric"><small>Pediatric-model finding</small><div class="meter"><span style="width:24%;background:var(--coral)"></span></div><strong class="coral">Weak response</strong></div>
+          </article>
+          <article class="candidate" data-candidate="B">
+            <div class="mol">
+              <svg viewBox="0 0 100 100"><rect x="19" y="18" width="28" height="28" rx="8" fill="#ffd36a"/><circle cx="72" cy="30" r="14" fill="#54e8ff"/><path d="M55 67 75 82 88 59z" fill="#6ff0b1"/><path d="M46 31h12M69 44l-7 16" stroke="#fff" stroke-width="5"/></svg>
+            </div>
+            <h3>Candidate B</h3>
+            <div class="adult-only"><small>Adult-model signal</small><div class="meter"><span style="width:65%"></span></div><strong>Moderate</strong></div>
+            <div class="pediatric"><small>Pediatric-model finding</small><div class="meter"><span style="width:90%;background:var(--green)"></span></div><strong class="green">Strong, reproducible signal</strong></div>
+          </article>
+          <article class="candidate" data-candidate="C">
+            <div class="mol">
+              <svg viewBox="0 0 100 100"><polygon points="50,10 84,35 72,80 28,80 16,35" fill="#ad78ff"/><circle cx="50" cy="48" r="18" fill="#07112b"/><circle cx="50" cy="48" r="9" fill="#ff7b84"/></svg>
+            </div>
+            <h3>Candidate C</h3>
+            <div class="adult-only"><small>Adult-model signal</small><div class="meter"><span style="width:78%"></span></div><strong>Strong</strong></div>
+            <div class="pediatric"><small>Pediatric-model finding</small><div class="meter"><span style="width:52%;background:var(--gold)"></span></div><strong class="gold">Inconsistent—test further</strong></div>
+          </article>
+        </div>
+        <div class="demo-actions">
+          <button class="action" id="revealEvidence">Reveal pediatric evidence</button>
+          <button class="action secondary" id="resetDemo">Reset</button>
+        </div>
+        <div class="demo-message" id="demoMessage"></div>
+      </div>
+      <div class="source-note">Demonstration data are hypothetical and illustrate decision value only. They do not represent clinical outcomes.</div>
+      <div class="scene-number">07 / 12</div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-title="What the client receives">
+      <div class="eyebrow">A real service needs a real deliverable</div>
+      <h2>The client receives a <span class="accent">decision-ready evidence report.</span></h2>
+      <div class="report glass">
+        <div>
+          <div class="report-title"><h3 style="margin:0">Pediatric Candidate Evidence Report</h3><span class="chip">Demonstration</span></div>
+          <div class="report-block"><small>Development question</small>Does this candidate show enough pediatric-model activity to justify the next study?</div>
+          <div class="report-block"><small>Model selected</small><span data-bind="models" class="placeholder">Pediatric-relevant model(s)</span></div>
+          <div class="report-block"><small>Finding</small>Response strength, reproducibility, model differences, and limitations</div>
+          <div class="report-block"><small>Evidence-supported next step</small><strong class="green">Advance to expanded validation</strong></div>
+        </div>
+        <div>
+          <div class="chart">
+            <div class="curve">
+              <svg viewBox="0 0 500 250" fill="none">
+                <path d="M20 28C70 35 95 46 135 70s56 70 95 91c52 28 100 33 240 40" stroke="#54e8ff" stroke-width="7" stroke-linecap="round"/>
+                <path d="M20 55C90 58 126 75 170 105s70 60 125 75c52 14 100 10 175 17" stroke="#ad78ff" stroke-width="5" stroke-linecap="round" opacity=".75"/>
+              </svg>
+            </div>
+          </div>
+          <p class="muted" style="font-size:13px;margin-top:12px">The report explains what the data mean—and what they do not prove.</p>
+        </div>
+      </div>
+      <div class="glass big-quote">The customer is not buying a graph. The customer is buying <span class="gold">less uncertainty.</span></div>
+      <div class="scene-number">08 / 12</div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" data-title="Why this is different">
+      <div class="eyebrow">The question judges will ask</div>
+      <h2>“Aren’t there already laboratories and cancer programs?”</h2>
+      <div class="compare">
+        <div class="compare-col glass">
+          <h3>General testing service</h3>
+          <div class="compare-row"><span class="minus">—</span><span>Starts with: “Which assay do you want?”</span></div>
+          <div class="compare-row"><span class="minus">—</span><span>Performs a requested technical test</span></div>
+          <div class="compare-row"><span class="minus">—</span><span>May use broad oncology models</span></div>
+          <div class="compare-row"><span class="minus">—</span><span>Returns technical results</span></div>
+          <div class="compare-row"><span class="minus">—</span><span>Leaves the pediatric meaning to the customer</span></div>
+        </div>
+        <div class="compare-col glass highlight">
+          <h3 data-bind="platformName">PediaBridge</h3>
+          <div class="compare-row"><span class="check">✓</span><span>Starts with: “Which pediatric decision must you make?”</span></div>
+          <div class="compare-row"><span class="check">✓</span><span>Selects a pediatric-relevant model</span></div>
+          <div class="compare-row"><span class="check">✓</span><span>Connects study design, testing, and interpretation</span></div>
+          <div class="compare-row"><span class="check">✓</span><span>Produces a structured evidence package</span></div>
+          <div class="compare-row"><span class="check">✓</span><span>Clarifies the most useful next experiment</span></div>
+        </div>
+      </div>
+      <div class="glass big-quote">The assay is a component. <span class="gold">The product is the pediatric evidence pathway.</span></div>
+      <div class="scene-number">09 / 12</div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" data-title="Who benefits and who pays">
+      <div class="eyebrow">The business must be clear</div>
+      <h2>The child is the beneficiary. <span class="accent">The drug developer is the customer.</span></h2>
+      <div class="stakeholders">
+        <div class="stake-card glass">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 20V7l7-4 7 4v13M9 20v-5h6v5M8 9h1M12 9h1M16 9h1M8 12h1M16 12h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Who pays?</h3>
+          <div class="pill-list"><span class="chip">Biotech startups</span><span class="chip">Academic drug teams</span><span class="chip">Pharma translational groups</span></div>
+          <p class="muted" style="margin-top:16px">They need pediatric evidence without building an entire specialized program internally.</p>
+        </div>
+        <div class="arrow-big">→</div>
+        <div class="stake-card glass" style="border-color:rgba(111,240,177,.3)">
+          <div class="icon-box" style="background:rgba(111,240,177,.1);border-color:rgba(111,240,177,.2)">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </div>
+          <h3>Who ultimately benefits?</h3>
+          <p class="lead" style="font-size:22px">Children whose cancers need better, earlier therapeutic options.</p>
+          <p class="muted">The service works upstream. It does not treat patients directly or guarantee clinical success.</p>
+        </div>
+      </div>
+      <div class="scene-number">10 / 12</div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" data-title="Proof and use of prize">
+      <div class="eyebrow">Why fund us now?</div>
+      <h2>Turn an existing scientific capability into a <span class="gold">pilot-ready service.</span></h2>
+      <div class="metric-grid">
+        <div class="metric glass"><strong data-bind="modelCount" class="placeholder">[X]</strong><span>Pediatric models established</span></div>
+        <div class="metric glass"><strong data-bind="experimentCount" class="placeholder">[X]</strong><span>Independent experiments completed</span></div>
+        <div class="metric glass"><strong data-bind="proofMetric" class="placeholder">[X%]</strong><span>Verified performance or reproducibility metric</span></div>
+      </div>
+      <div class="funding-flow">
+        <div class="fund-node"><strong>$1,000</strong><br>competition prize</div><div class="fund-arrow">→</div>
+        <div class="fund-node"><span data-bind="prizeUse" class="placeholder">specific reagents and assay materials</span></div><div class="fund-arrow">→</div>
+        <div class="fund-node"><span data-bind="milestone" class="placeholder">validate the next defined service milestone</span></div><div class="fund-arrow">→</div>
+        <div class="fund-node green"><strong>FIRST EXTERNAL PILOT</strong></div>
+      </div>
+      <div class="glass big-quote">The prize does not merely fund another experiment. It helps make the science <span class="accent">usable by another drug-development team.</span></div>
+      <div class="scene-number">11 / 12</div>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" data-title="The final message">
+      <div class="closing">
+        <div class="eyebrow">Close by changing the order</div>
+        <h2>Move the pediatric question from <span class="coral">later</span> to <span class="green">earlier.</span></h2>
+        <div class="closing-pipeline">
+          <div class="closing-line"></div>
+          <div class="late-point">ASK LATER<div class="point-dot"></div></div>
+          <div class="early-point">ASK EARLIER<div class="point-dot"></div></div>
+        </div>
+        <p class="lead" style="margin-inline:auto">We are not building only one drug. We are building a pathway through which many potential drugs can be evaluated for children.</p>
+        <h1 class="gradient-text" style="font-size:clamp(38px,6vw,78px);margin-top:26px">Ask the pediatric question earlier.</h1>
+        <div class="chip" style="margin-top:8px"><strong data-bind="platformName">PediaBridge</strong>&nbsp;—&nbsp;<span data-bind="tagline">Bringing childhood cancer into drug development earlier</span></div>
+      </div>
+      <div class="scene-number">12 / 12</div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Presentation navigation">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous slide">←</button>
+    <div class="slide-label"><strong id="slideCounter">1 / 12</strong><br><span class="hotkey">← → or space</span></div>
+    <button class="nav-btn" id="nextBtn" aria-label="Next slide">→</button>
+  </nav>
+
+  <!-- Presenter Notes -->
+  <div class="overlay" id="notesOverlay">
+    <div class="modal">
+      <div class="modal-head"><h2>Presenter Script</h2><span class="chip" id="notesSlideLabel">Scene 1</span><button class="close" data-close="notesOverlay">✕</button></div>
+      <div class="notes-layout">
+        <aside class="note-meta glass">
+          <div class="meta-row"><small>Purpose</small><strong id="notePurpose"></strong></div>
+          <div class="meta-row"><small>Tone</small><strong id="noteTone"></strong></div>
+          <div class="meta-row"><small>Target time</small><strong id="noteTime"></strong></div>
+          <div class="meta-row"><small>Delivery cue</small><strong id="noteCue"></strong></div>
+          <div class="meta-row"><small>Transition</small><strong id="noteTransition"></strong></div>
+          <button class="action copy-btn" id="copyCurrentScript">Copy this scene</button>
+          <button class="action secondary copy-btn" id="copyFullScript">Copy full script</button>
+        </aside>
+        <article class="note-script glass" id="noteScript"></article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q&A -->
+  <div class="overlay" id="qaOverlay">
+    <div class="modal">
+      <div class="modal-head"><h2>Judge Questions &amp; Strong Answers</h2><button class="action secondary" id="randomQuestion">Practice a random question</button><button class="close" data-close="qaOverlay">✕</button></div>
+      <div class="qa-controls"><input class="qa-search" id="qaSearch" placeholder="Search questions..." /></div>
+      <div class="qa-list" id="qaList"></div>
+    </div>
+  </div>
+
+  <!-- Customization -->
+  <div class="overlay" id="customizeOverlay">
+    <div class="modal">
+      <div class="modal-head"><h2>Customize the Real Project Details</h2><span class="chip">Saved in this browser</span><button class="close" data-close="customizeOverlay">✕</button></div>
+      <p class="muted">Replace every bracketed placeholder with verified team information. Do not invent data.</p>
+      <div class="form-grid" id="customForm">
+        <div class="field"><label>Platform name</label><input name="platformName" /></div>
+        <div class="field"><label>Tagline</label><input name="tagline" /></div>
+        <div class="field"><label>Real pediatric model(s)</label><input name="models" /></div>
+        <div class="field"><label>Real assays / endpoints</label><input name="assays" /></div>
+        <div class="field"><label>Number of models established</label><input name="modelCount" /></div>
+        <div class="field"><label>Number of independent experiments</label><input name="experimentCount" /></div>
+        <div class="field"><label>Verified performance metric</label><input name="proofMetric" /></div>
+        <div class="field"><label>Exact use of $1,000</label><input name="prizeUse" /></div>
+        <div class="field" style="grid-column:1/-1"><label>Measurable milestone unlocked by the prize</label><textarea name="milestone"></textarea></div>
+      </div>
+      <div class="form-actions"><button class="action secondary" id="resetCustom">Reset</button><button class="action" id="saveCustom">Save and update presentation</button></div>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <div class="overlay" id="overviewOverlay">
+    <div class="modal">
+      <div class="modal-head"><h2>Presentation Overview</h2><button class="close" data-close="overviewOverlay">✕</button></div>
+      <div class="overview-grid" id="overviewGrid"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied</div>
+</div>
+
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+let current = 0;
+let timerStart = Date.now();
+let timerInterval;
+let reducedMotion = false;
+
+const scripts = [
+{
+ purpose:"Create immediate empathy before introducing science.",
+ tone:"Quiet, human, controlled.",
+ time:"20–25 seconds",
+ cue:"Stand still. Pause after “your child.” Do not rush the final question.",
+ transition:"To understand why this question is missed, we first have to correct one common assumption.",
+ script:`Imagine that your child has cancer.
+
+Now imagine that somewhere, a promising medicine may already exist—but researchers still do not know whether it shows enough promise against the kind of cancer your child has.
+
+Not because nobody cares.
+
+Because the drug-development system usually begins somewhere else: with adults.
+
+Our project begins with one simple question:
+
+Why should children wait until the end of the process before we ask whether a new treatment could be relevant to them?`
+},
+{
+ purpose:"Explain the adult-versus-child difference without technical overload.",
+ tone:"Clear, educational, confident.",
+ time:"30–35 seconds",
+ cue:"Emphasize: “Cancer is not one disease.” Use the diagram, not jargon.",
+ transition:"If the diseases and bodies are different, why does drug development so often begin in the same place?",
+ script:`People often hear the word cancer and think it is one disease.
+
+It is not.
+
+Cancer is a large family of diseases. The cancers children develop can grow differently, spread differently, and respond differently from cancers that are common in adults.
+
+There is another important difference: the treatment is entering a body that is still growing.
+
+So this is not simply a question of giving a child a smaller adult dose.
+
+The real question is:
+
+Does this drug show enough promise in a pediatric cancer model to deserve the next step?`
+},
+{
+ purpose:"Make the delay visible and explain where it begins.",
+ tone:"Serious and explanatory.",
+ time:"35–40 seconds",
+ cue:"Trace the pathway with one hand. Slow down at “major decisions.”",
+ transition:"So what exactly is missing when a developer wants to ask the pediatric question?",
+ script:`Here is how the problem develops.
+
+A new cancer drug usually begins in an adult-focused research program.
+
+It is tested in adult models. Adult evidence is collected. Companies decide where to invest, which drug to advance, and which program to stop.
+
+The pediatric question may come later.
+
+A historical study of oncology drugs found a median gap of six and a half years between the first human trial and the first trial involving children.
+
+But the deeper problem is not just the number of years.
+
+The delay begins earlier—when major drug-development decisions are made without pediatric evidence.`
+},
+{
+ purpose:"Define the precise commercial and scientific gap.",
+ tone:"Analytical but accessible.",
+ time:"30–35 seconds",
+ cue:"Let the floating questions appear one at a time. Do not answer them yet.",
+ transition:"Our platform is designed to place those answers earlier in the process.",
+ script:`A drug developer may already have a promising molecule.
+
+But important questions can still be unanswered.
+
+Which pediatric cancer model should be used?
+
+Does the candidate produce a meaningful response?
+
+Is that response reproducible?
+
+Should the company invest more, change the strategy, combine the drug with something else, or stop?
+
+Answering these questions requires the right models, the right study design, specialized laboratory work, and careful interpretation.
+
+The missing product is not simply more data.
+
+It is an earlier, clearer pediatric decision.`
+},
+{
+ purpose:"Reveal the solution in one memorable visual.",
+ tone:"Confident, optimistic, decisive.",
+ time:"30–35 seconds",
+ cue:"Step slightly forward when the checkpoint appears.",
+ transition:"Here is what happens when a customer brings us a candidate.",
+ script:`Our solution is simple to understand.
+
+We place a pediatric evidence checkpoint earlier in drug development.
+
+Before a developer commits more years and more money, our service asks:
+
+Does this candidate show enough promise in pediatric cancer models to deserve the next step?
+
+The answer may be to advance it, modify it, combine it with another therapy, test it further, or stop.
+
+We do not promise that every drug will work.
+
+We help developers ask the right pediatric question sooner.`
+},
+{
+ purpose:"Make the service concrete and purchasable.",
+ tone:"Practical and businesslike.",
+ time:"35–40 seconds",
+ cue:"Count the four stages with your hand: receive, match, test, explain.",
+ transition:"To see why this changes a decision, I want to let you act as the investor.",
+ script:`This is how the service works.
+
+First, a researcher or company brings us a drug candidate, a combination, a molecular target, or a development question.
+
+Second, we match that question with the appropriate pediatric cancer model and study design.
+
+Third, we perform the validated laboratory testing.
+
+Finally, we analyze the response and provide a structured evidence package showing what happened, what remains uncertain, and what should be tested next.
+
+The experiment creates data.
+
+Our service turns that data into a clearer development decision.`
+},
+{
+ purpose:"Let judges experience the value instead of merely hearing it.",
+ tone:"Engaging, curious, lightly playful but professional.",
+ time:"45–60 seconds",
+ cue:"Ask a judge to choose. Wait for a response before revealing pediatric evidence.",
+ transition:"This is why the final deliverable must do more than show a graph.",
+ script:`Let us make the problem tangible.
+
+Imagine that your company can fund only one of these three drug candidates.
+
+Based on the adult-focused evidence, which one would you choose?
+
+[Pause and select the judge’s choice.]
+
+Now let us ask the pediatric question.
+
+[Reveal the pediatric evidence.]
+
+The strongest adult signal is not automatically the strongest pediatric signal.
+
+Candidate B, which looked only moderate in the adult model, now shows the strongest and most reproducible pediatric response.
+
+These are hypothetical data, so they do not prove clinical success.
+
+But they demonstrate the decision our platform helps inform:
+
+Which candidate deserves the next pediatric experiment?`
+},
+{
+ purpose:"Show the deliverable and define what the customer is buying.",
+ tone:"Precise and credible.",
+ time:"30–35 seconds",
+ cue:"Point to the report sections. Emphasize “less uncertainty.”",
+ transition:"That integrated deliverable is also what separates us from a general laboratory service.",
+ script:`The customer does not simply receive a graph.
+
+The customer receives a pediatric candidate evidence report.
+
+It explains which model was used, why it was selected, how strongly the candidate responded, whether the finding was reproducible, what the limitations are, and what evidence-supported next step should be considered.
+
+We are careful about what the data can and cannot prove.
+
+Preclinical evidence cannot guarantee that a drug will work in a child.
+
+But it can reduce uncertainty before the next expensive decision.
+
+The customer is not buying a graph.
+
+The customer is buying less uncertainty.`
+},
+{
+ purpose:"Answer the competition question: why is this not just another cancer program?",
+ tone:"Direct, differentiated, confident.",
+ time:"35–40 seconds",
+ cue:"Pause fully after the final two sentences.",
+ transition:"Now that the difference is clear, here is who uses the service and who ultimately benefits.",
+ script:`There are excellent cancer programs and many laboratories that can perform assays.
+
+We are not claiming otherwise.
+
+Our difference is where we begin and what we deliver.
+
+A general testing service may begin by asking, “Which assay would you like us to run?”
+
+We begin by asking, “Which pediatric development decision are you trying to make?”
+
+Then we connect pediatric model selection, study design, testing, interpretation, and next-step planning in one service.
+
+The assay is a component.
+
+The product is the pediatric evidence pathway.`
+},
+{
+ purpose:"Clarify the customer, beneficiary, and commercial logic.",
+ tone:"Businesslike and transparent.",
+ time:"30–35 seconds",
+ cue:"Clearly separate “beneficiary” from “customer.”",
+ transition:"The final question is why this team should receive the prize now.",
+ script:`The child is the ultimate beneficiary, but the child is not the customer.
+
+Our customers are organizations developing therapies: biotechnology startups, academic drug-discovery teams, and pharmaceutical translational groups.
+
+They pay because building specialized pediatric oncology testing internally requires models, trained personnel, protocols, equipment, and time.
+
+Our service gives them focused access to that capability when they need it.
+
+The impact is upstream: helping stronger pediatric hypotheses move forward and weaker ones stop before more resources are invested.`
+},
+{
+ purpose:"Prove readiness and give the prize a specific job.",
+ tone:"Concrete, factual, accountable.",
+ time:"35–45 seconds",
+ cue:"Use only verified numbers. Never say “amazing”; show the metric.",
+ transition:"End by returning to the one change the audience should remember.",
+ script:`This is not only an idea.
+
+Our laboratory has already established [INSERT VERIFIED NUMBER] pediatric models and completed [INSERT VERIFIED NUMBER] independent experiments.
+
+Our verified result is [INSERT PRECISE RESULT OR REPRODUCIBILITY METRIC].
+
+We are now turning that scientific capability into a repeatable service.
+
+The one-thousand-dollar prize has a specific job.
+
+It will fund [INSERT EXACT REAGENTS OR MATERIALS], allowing us to reach [INSERT MEASURABLE MILESTONE].
+
+The prize does not merely fund another experiment.
+
+It helps make our science usable by another drug-development team.`
+},
+{
+ purpose:"Leave one unforgettable idea and a disciplined emotional finish.",
+ tone:"Slow, grounded, hopeful.",
+ time:"35–40 seconds",
+ cue:"Do not move during the final four lines. Hold silence before saying thank you.",
+ transition:"None—stop after the final line.",
+ script:`Today, the pediatric question often enters after an adult-focused development path is already underway.
+
+We are moving that question earlier.
+
+We cannot promise that every drug we test will succeed.
+
+What we can provide is earlier evidence:
+
+Evidence to advance a promising candidate.
+
+Evidence to redesign a weak candidate.
+
+Evidence to stop an unpromising path.
+
+And evidence to justify the next pediatric step.
+
+We are not building only one drug.
+
+We are building a pathway through which many potential drugs can be evaluated for children.
+
+Childhood cancer should not enter drug development as an afterthought.
+
+It should be part of the decision from the beginning.
+
+Ask the pediatric question earlier.`
+}
+];
+
+const qa = [
+{
+ q:"What exactly are you selling?",
+ short:"We sell earlier pediatric-relevant evidence that helps a drug developer decide what to do next with a candidate.",
+ long:"The service combines pediatric model selection, study design, laboratory testing, analysis, and a structured evidence report. The output supports a choice to advance, modify, combine, validate further, or deprioritize a candidate."
+},
+{
+ q:"Why is pediatric cancer different from adult cancer?",
+ short:"Cancer is not one disease. Childhood cancers may grow, spread, and respond differently, and treatment enters a body that is still developing.",
+ long:"The difference is not merely patient size. The tumor biology can differ, and a child’s organs and physiological systems are still developing. That is why adult evidence alone cannot answer every pediatric development question."
+},
+{
+ q:"Aren’t there already many programs helping children with cancer?",
+ short:"Yes—and those programs prove the need is important. Our role is more specific: we provide an earlier pediatric evidence service for drug-development decisions.",
+ long:"We are not replacing hospitals, charities, clinical-trial networks, or broad research programs. We address one bottleneck before a clinical trial: helping a developer evaluate pediatric relevance and decide which experiment or candidate should move forward."
+},
+{
+ q:"How does this accelerate drug development?",
+ short:"We accelerate an early decision point, not every stage of development.",
+ long:"By producing pediatric-relevant evidence earlier, we help developers avoid waiting until later to discover that a candidate is weak, or to recognize that a candidate deserves more pediatric investigation. The measurable value is faster, better-informed prioritization."
+},
+{
+ q:"Does a positive cell result mean the drug will work in a child?",
+ short:"No. Preclinical evidence cannot guarantee clinical success.",
+ long:"Our platform reduces uncertainty and supports the next research decision. A positive preclinical signal still requires additional validation, safety work, regulatory planning, and clinical investigation."
+},
+{
+ q:"Who pays for the service?",
+ short:"Biotechnology companies, academic drug-discovery teams, and pharmaceutical translational groups.",
+ long:"These organizations may have promising candidates but lack specialized pediatric models, protocols, or internal expertise. They purchase focused pilot studies and can later expand into multi-model or combination studies."
+},
+{
+ q:"Who benefits?",
+ short:"Children and families ultimately benefit, but the paying customer is the drug developer.",
+ long:"Our work is upstream. We do not treat patients directly. We help improve which pediatric hypotheses receive the next investment and which weak paths are stopped earlier."
+},
+{
+ q:"Why can’t a company use a general contract research organization?",
+ short:"It can. Our advantage must be pediatric specialization and an integrated, decision-oriented deliverable.",
+ long:"A general CRO may perform a requested assay. Our service begins with the pediatric development question, selects a relevant model, integrates testing and interpretation, and produces a structured evidence package. We should never claim that no other provider exists."
+},
+{
+ q:"What is your first purchasable service?",
+ short:"A focused pediatric signal pilot.",
+ long:"A practical first package could test one candidate in one or two pediatric-relevant models using defined endpoints, followed by analysis and a concise evidence report. The exact package must match the laboratory’s validated capabilities."
+},
+{
+ q:"What makes this a platform rather than one experiment?",
+ short:"The same repeatable pathway can evaluate many candidates, targets, combinations, and pediatric cancer models.",
+ long:"The platform standardizes intake, model selection, study design, testing, analysis, quality checks, and reporting. It can therefore support multiple clients and projects rather than depending on one drug."
+},
+{
+ q:"What has already been built?",
+ short:"Answer only with verified models, assays, experiments, and performance metrics.",
+ long:"A strong answer names the exact pediatric models established, the assays optimized, the number of independent experiments completed, and one reproducibility or performance result. Never substitute adjectives for evidence."
+},
+{
+ q:"How will you use the $1,000?",
+ short:"The prize funds a defined validation milestone required for the first external pilot.",
+ long:"Name the exact reagents or materials, the number of models or experiments, the quality threshold, and the deliverable created. Avoid saying only that the money will continue the research."
+},
+{
+ q:"Why is this commercially viable if pediatric cancers are rare?",
+ short:"The business serves multiple drug-development programs rather than depending on sales of one medicine.",
+ long:"Revenue can come from repeated studies across different candidates, targets, cancer types, and customers. The initial model is fee-for-service, with expansion into larger studies and research partnerships."
+},
+{
+ q:"What protects the platform from being copied?",
+ short:"Defensibility comes from validated models, optimized protocols, accumulated data, specialized expertise, and trusted customer relationships.",
+ long:"Do not claim a patent unless one exists. The strongest near-term moat is reliable execution: quality-controlled models, reproducible assays, interpretation expertise, turnaround, and a growing evidence base."
+},
+{
+ q:"What could cause this project to fail?",
+ short:"Weak customer demand, insufficient assay reproducibility, limited model relevance, or an unclear service deliverable.",
+ long:"A credible team addresses these risks through customer interviews, predefined quality thresholds, model validation, transparent limitations, and a focused pilot service before expanding."
+},
+{
+ q:"Why is your team qualified?",
+ short:"Connect each team member’s expertise directly to one part of the service.",
+ long:"Explain who owns pediatric oncology biology, pharmacology, laboratory execution, data analysis, commercialization, and client communication. Do not rely on titles alone; show how the skills complete the workflow."
+},
+{
+ q:"Why now?",
+ short:"Drug development increasingly needs earlier, molecularly relevant pediatric planning.",
+ long:"Precision oncology and FDA pediatric-planning requirements for certain molecularly targeted oncology products make early pediatric evidence more relevant. Our service supports development planning; it does not guarantee regulatory acceptance."
+},
+{
+ q:"What will success look like in one year?",
+ short:"Validated service quality, completed external pilots, and at least one repeat or expanded customer engagement.",
+ long:"Use measurable goals: number of validated models, reproducibility threshold, turnaround time, number of pilot projects, customer feedback, and conversion from pilot to expanded study."
+}
+];
+
+function showSlide(index){
+  index = Math.max(0, Math.min(slides.length-1,index));
+  slides.forEach((s,i)=>{
+    s.classList.toggle('active',i===index);
+    s.classList.toggle('exit-left',i<index);
+  });
+  current=index;
+  document.getElementById('progressBar').style.width=((current+1)/slides.length*100)+'%';
+  document.getElementById('slideCounter').textContent=`${current+1} / ${slides.length}`;
+  updateNotes();
+}
+function next(){showSlide(current+1)}
+function prev(){showSlide(current-1)}
+document.getElementById('nextBtn').onclick=next;
+document.getElementById('prevBtn').onclick=prev;
+document.addEventListener('keydown',e=>{
+  if(document.querySelector('.overlay.open')){
+    if(e.key==='Escape') document.querySelector('.overlay.open').classList.remove('open');
+    return;
+  }
+  if(['ArrowRight','PageDown'].includes(e.key) || e.code==='Space'){e.preventDefault();next()}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+  if(e.key==='Home')showSlide(0);
+  if(e.key==='End')showSlide(slides.length-1);
+});
+function openOverlay(id){document.getElementById(id).classList.add('open')}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).classList.remove('open'));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+document.getElementById('notesBtn').onclick=()=>{updateNotes();openOverlay('notesOverlay')};
+document.getElementById('qaBtn').onclick=()=>openOverlay('qaOverlay');
+document.getElementById('customizeBtn').onclick=()=>{populateForm();openOverlay('customizeOverlay')};
+document.getElementById('overviewBtn').onclick=()=>openOverlay('overviewOverlay');
+
+function updateNotes(){
+  const s=scripts[current];
+  document.getElementById('notesSlideLabel').textContent=`Scene ${current+1}: ${slides[current].dataset.title}`;
+  document.getElementById('notePurpose').textContent=s.purpose;
+  document.getElementById('noteTone').textContent=s.tone;
+  document.getElementById('noteTime').textContent=s.time;
+  document.getElementById('noteCue').textContent=s.cue;
+  document.getElementById('noteTransition').textContent=s.transition;
+  document.getElementById('noteScript').textContent=s.script;
+}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard')).catch(()=>toast('Copy failed'));
+}
+document.getElementById('copyCurrentScript').onclick=()=>copyText(scripts[current].script);
+document.getElementById('copyFullScript').onclick=()=>copyText(scripts.map((s,i)=>`SCENE ${i+1}: ${slides[i].dataset.title}\n\n${s.script}`).join('\n\n------------------------------\n\n'));
+
+const qaList=document.getElementById('qaList');
+function renderQA(filter=''){
+  qaList.innerHTML='';
+  qa.filter(item=>(item.q+' '+item.short+' '+item.long).toLowerCase().includes(filter.toLowerCase())).forEach(item=>{
+    const el=document.createElement('article');
+    el.className='qa-item';
+    el.innerHTML=`<button class="qa-q"><span>${item.q}</span><span>＋</span></button>
+      <div class="qa-a"><div class="short"><small>15-SECOND ANSWER</small><br>${item.short}</div>
+      <small>EXPANDED ANSWER</small><p>${item.long}</p></div>`;
+    el.querySelector('.qa-q').onclick=()=>el.classList.toggle('open');
+    qaList.appendChild(el);
+  });
+}
+renderQA();
+document.getElementById('qaSearch').oninput=e=>renderQA(e.target.value);
+document.getElementById('randomQuestion').onclick=()=>{
+  renderQA();
+  const items=[...qaList.children];
+  items.forEach(i=>i.classList.remove('open'));
+  const picked=items[Math.floor(Math.random()*items.length)];
+  picked.classList.add('open');picked.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+const demoPanel=document.getElementById('demoPanel');
+document.querySelectorAll('.candidate').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('.candidate').forEach(x=>x.classList.remove('selected'));
+  c.classList.add('selected');
+  document.getElementById('demoMessage').textContent=`You initially chose Candidate ${c.dataset.candidate}. Now reveal the pediatric evidence.`;
+});
+document.getElementById('revealEvidence').onclick=()=>{
+  demoPanel.classList.add('revealed');
+  document.getElementById('demoMessage').textContent='Would your decision change? This is the uncertainty our platform helps reduce.';
+};
+document.getElementById('resetDemo').onclick=()=>{
+  demoPanel.classList.remove('revealed');
+  document.querySelectorAll('.candidate').forEach(x=>x.classList.remove('selected'));
+  document.getElementById('demoMessage').textContent='';
+};
+
+document.querySelectorAll('.step').forEach(step=>step.onclick=()=>{
+  document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));step.classList.add('active');
+});
+
+const defaults={
+  platformName:'PediaBridge',
+  tagline:'Bringing childhood cancer into drug development earlier',
+  models:'Pediatric-relevant model(s)',
+  assays:"the team’s validated assays",
+  modelCount:'[X]',
+  experimentCount:'[X]',
+  proofMetric:'[X%]',
+  prizeUse:'specific reagents and assay materials',
+  milestone:'validate the next defined service milestone'
+};
+let custom={...defaults,...JSON.parse(localStorage.getItem('pediatricPitchCustom')||'{}')};
+function applyCustom(){
+  document.querySelectorAll('[data-bind]').forEach(el=>{
+    const key=el.dataset.bind;
+    el.textContent=custom[key]||defaults[key]||'';
+    el.classList.toggle('placeholder',String(el.textContent).includes('[')||custom[key]===defaults[key]&&['models','assays','modelCount','experimentCount','proofMetric','prizeUse','milestone'].includes(key));
+  });
+}
+function populateForm(){
+  [...document.querySelectorAll('#customForm [name]')].forEach(input=>input.value=custom[input.name]||'');
+}
+document.getElementById('saveCustom').onclick=()=>{
+  [...document.querySelectorAll('#customForm [name]')].forEach(input=>custom[input.name]=input.value.trim()||defaults[input.name]);
+  localStorage.setItem('pediatricPitchCustom',JSON.stringify(custom));applyCustom();
+  document.getElementById('customizeOverlay').classList.remove('open');toast('Project details updated');
+};
+document.getElementById('resetCustom').onclick=()=>{
+  custom={...defaults};localStorage.removeItem('pediatricPitchCustom');populateForm();applyCustom();toast('Placeholders restored');
+};
+applyCustom();
+
+const overviewGrid=document.getElementById('overviewGrid');
+slides.forEach((slide,i)=>{
+  const btn=document.createElement('button');btn.className='thumb';
+  btn.innerHTML=`<small>SCENE ${String(i+1).padStart(2,'0')}</small><h3>${slide.dataset.title}</h3><span class="muted">${scripts[i].purpose}</span>`;
+  btn.onclick=()=>{showSlide(i);document.getElementById('overviewOverlay').classList.remove('open')};
+  overviewGrid.appendChild(btn);
+});
+
+document.getElementById('fullBtn').onclick=()=>{
+  if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+};
+document.getElementById('motionBtn').onclick=()=>{
+  reducedMotion=!reducedMotion;
+  document.getElementById('app').classList.toggle('reduce-motion',reducedMotion);
+  toast(reducedMotion?'Motion reduced':'Animations restored');
+};
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function updateTimer(){
+  const sec=Math.floor((Date.now()-timerStart)/1000);
+  document.getElementById('timer').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+}
+timerInterval=setInterval(updateTimer,1000);
+showSlide(0);
+</script>
+</body>
+</html>
